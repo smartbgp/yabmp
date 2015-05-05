@@ -14,3 +14,17 @@
 
 # log configuration file
 # log-config-file =
+
+[bmp]
+
+# BMP server bind host ip address
+# bind_host = 0.0.0.0
+
+# BMP server bind port number
+# bind_port = 20000
+
+# the BMP messages storage path
+# write_dir = /home/bgpmon/data/bmp/
+
+# The Max size of one BGP message file, the unit is MB
+# write_msg_max_size = 500

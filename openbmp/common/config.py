@@ -12,3 +12,26 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+""" basic config """
+
+from oslo.config import cfg
+
+CONF = cfg.CONF
+
+bmp_options = [
+
+    cfg.StrOpt('bind_host',
+               default='0.0.0.0',
+               help='Address to bind the BMP server to'),
+    cfg.IntOpt('bind_port',
+               default=20000,
+               help='Port the bind the BMP server to'),
+
+    cfg.StrOpt('write_dir',
+               default='/home/bgpmon/data/bmp/',
+               help='The BMP messages storage path'),
+    cfg.IntOpt('write_msg_max_size',
+               default=500,
+               help='The Max size of one BMP message file, the unit is MB'),
+]
