@@ -1,0 +1,4 @@
+openbgp>=1.0.1
+pbr>=0.5.21,<1.0
+oslo.config==1.6.0
+Twisted==15.0.0
