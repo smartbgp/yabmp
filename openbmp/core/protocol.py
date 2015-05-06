@@ -12,3 +12,15 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+
+from twisted.internet import protocol
+
+
+class BMP(protocol.Protocol):
+    """
+    BGP Monitoring Protocol
+    """
+
+    def __init__(self):
+        pass

@@ -1,7 +1,7 @@
 # Copyright 2015 Cisco Systems, Inc.
 # All rights reserved.
 #
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
 #
@@ -12,3 +12,30 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+""" BMP Factory"""
+
+import logging
+
+from twisted.internet import protocol
+
+from openbmp.core.protocol import BMP
+
+
+LOG = logging.getLogger()
+
+
+class BMPFactory(protocol.Factory):
+    """Base factory for creating BMP protocol instances."""
+
+    protocol = BMP
+
+    def __init__(self, msg_path=None):
+        LOG.info('initial BMP Factory!')
+        self.msg_path = msg_path
+        pass
+
+    def buildProtocol(self, addr):
+        """Builds a BMPProtocol instance.
+        """
+        return protocol.Factory.buildProtocol(self, addr)
