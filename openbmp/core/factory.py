@@ -31,9 +31,8 @@ class BMPFactory(protocol.Factory):
     protocol = BMP
 
     def __init__(self, msg_path=None):
-        LOG.info('initial BMP Factory!')
+        LOG.info('Initial BMP Factory!')
         self.msg_path = msg_path
-        pass
 
     def buildProtocol(self, addr):
         """Builds a BMPProtocol instance.
