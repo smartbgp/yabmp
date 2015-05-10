@@ -47,7 +47,6 @@ def prepare_service(args=None):
     cfg.CONF.log_opt_values(LOG, logging.INFO)
 
     # check BMP message output path
-    print CONF.bmp.write_dir
     if not os.path.exists(CONF.bmp.write_dir):
         try:
             os.makedirs(CONF.bmp.write_dir)
