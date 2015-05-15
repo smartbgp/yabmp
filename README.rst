@@ -33,8 +33,8 @@ Send email to penxiao@cisco.com, or use GitHub issue system/pull request.
 
 
 .. |License| image:: https://img.shields.io/hexpm/l/plug.svg
-   :target: https://github.com/yabgp/openbmp/blob/master/LICENSE
-.. |Build Status| image:: https://travis-ci.org/yabgp/openbmp.svg
-   :target: https://travis-ci.org/yabgp/openbmp
-.. |Code Climate| image:: https://codeclimate.com/github/yabgp/openbmp/badges/gpa.svg
-   :target: https://codeclimate.com/github/yabgp/openbmp
+   :target: https://github.com/smartbgp/yabmp/blob/master/LICENSE
+.. |Build Status| image:: https://travis-ci.org/smartbgp/yabmp.svg
+   :target: https://travis-ci.org/smartbgp/yabmp
+.. |Code Climate| image:: https://codeclimate.com/github/smartbgp/yabmp/badges/gpa.svg
+   :target: https://codeclimate.com/github/smartbgp/yabmp
