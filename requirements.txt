@@ -1,4 +1,4 @@
-openbgp>=1.0.1
+yabgp>=1.0.1
 ipaddr>=2.1.11
 pbr>=0.5.21,<1.0
 oslo.config==1.6.0

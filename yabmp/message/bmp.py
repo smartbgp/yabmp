@@ -19,14 +19,14 @@ import logging
 import traceback
 
 import ipaddr
-from openbgp.message.notification import Notification
-from openbgp.message.update import Update
-from openbgp.message.route_refresh import RouteRefresh
-from openbgp.message.open import Open
-from openbgp.common import constants as bgp_cons
+from yabgp.message.notification import Notification
+from yabgp.message.update import Update
+from yabgp.message.route_refresh import RouteRefresh
+from yabgp.message.open import Open
+from yabgp.common import constants as bgp_cons
 
-from openbmp.common import constants as bmp_cons
-from openbmp.common import exception as excp
+from yabmp.common import constants as bmp_cons
+from yabmp.common import exception as excp
 
 LOG = logging.getLogger()
 

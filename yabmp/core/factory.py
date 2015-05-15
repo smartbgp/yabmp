@@ -19,7 +19,7 @@ import logging
 
 from twisted.internet import protocol
 
-from openbmp.core.protocol import BMP
+from yabmp.core.protocol import BMP
 
 
 LOG = logging.getLogger()

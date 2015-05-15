@@ -1,12 +1,12 @@
-openbmp
-=======
+YABMP
+=====
 
 |License| |Build Status| |Code Climate|
 
 Overview
 ~~~~~~~~
 
-`OpenBMP` is a receiver-side implementation of the `BMP` (BGP Monitoring Protocol) in the Python language. It serves as a reference for how to step through the messages and write their contents to files.
+`YABMP` is a receiver-side implementation of the `BMP` (BGP Monitoring Protocol) in the Python language. It serves as a reference for how to step through the messages and write their contents to files.
 
 This implementation covers draft BGP Monitoring Protocol draft-ietf-grow-bmp-07
 
@@ -33,8 +33,8 @@ Send email to penxiao@cisco.com, or use GitHub issue system/pull request.
 
 
 .. |License| image:: https://img.shields.io/hexpm/l/plug.svg
-   :target: https://github.com/openbgp/openbmp/blob/master/LICENSE
-.. |Build Status| image:: https://travis-ci.org/openbgp/openbmp.svg
-   :target: https://travis-ci.org/openbgp/openbmp
-.. |Code Climate| image:: https://codeclimate.com/github/openbgp/openbmp/badges/gpa.svg
-   :target: https://codeclimate.com/github/openbgp/openbmp
+   :target: https://github.com/yabgp/openbmp/blob/master/LICENSE
+.. |Build Status| image:: https://travis-ci.org/yabgp/openbmp.svg
+   :target: https://travis-ci.org/yabgp/openbmp
+.. |Code Climate| image:: https://codeclimate.com/github/yabgp/openbmp/badges/gpa.svg
+   :target: https://codeclimate.com/github/yabgp/openbmp

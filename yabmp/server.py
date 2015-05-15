@@ -17,10 +17,10 @@ import logging
 import os
 import sys
 
-from openbmp import version
-from openbmp import config
-from openbmp.core.factory import BMPFactory
-from openbmp.common import log
+from yabmp import version
+from yabmp import config
+from yabmp.core.factory import BMPFactory
+from yabmp.common import log
 
 log.early_init_log(logging.DEBUG)
 
@@ -36,10 +36,10 @@ LOG = logging.getLogger(__name__)
 
 def prepare_service(args=None):
     try:
-        CONF(args=args, project='openbmp', version=version,
-             default_config_files=['/etc/openbmp/openbmp.ini'])
+        CONF(args=args, project='yabmp', version=version,
+             default_config_files=['/etc/yabmp/yabmp.ini'])
     except cfg.ConfigFilesNotFoundError:
-        CONF(args=args, project='openbmp', version=version)
+        CONF(args=args, project='yabmp', version=version)
 
     log.init_log()
     LOG.info('Log (Re)opened.')

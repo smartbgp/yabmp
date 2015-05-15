@@ -15,11 +15,11 @@
 
 import setuptools
 
-import openbmp.hooks
+import yabmp.hooks
 
-openbmp.hooks.save_orig()
+yabmp.hooks.save_orig()
 
 setuptools.setup(
-    name='openbmp',
+    name='yabmp',
     setup_requires=['pbr'],
     pbr=True)

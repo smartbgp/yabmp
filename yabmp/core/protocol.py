@@ -21,9 +21,9 @@ import struct
 import traceback
 from twisted.internet import protocol
 
-from openbmp.common import constants as bmp_cons
-from openbmp.common import exception as excp
-from openbmp.message.bmp import BMPMessage
+from yabmp.common import constants as bmp_cons
+from yabmp.common import exception as excp
+from yabmp.message.bmp import BMPMessage
 
 LOG = logging.getLogger()
 
