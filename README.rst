@@ -1,11 +1,7 @@
 YABMP
 =====
 
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/smartbgp/yabmp
-   :target: https://gitter.im/smartbgp/yabmp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
-|License| |Build Status| |Code Climate|
+|Join Chat| |License| |Build Status| |Code Climate| |Code Health|
 
 Overview
 ~~~~~~~~
@@ -42,3 +38,8 @@ Send email to penxiao@cisco.com, or use GitHub issue system/pull request.
    :target: https://travis-ci.org/smartbgp/yabmp
 .. |Code Climate| image:: https://codeclimate.com/github/smartbgp/yabmp/badges/gpa.svg
    :target: https://codeclimate.com/github/smartbgp/yabmp
+.. |Join Chat| image:: https://badges.gitter.im/Join%20Chat.svg
+   :target: https://gitter.im/smartbgp/yabmp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+.. |Code Health| image:: https://landscape.io/github/smartbgp/yabmp/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/smartbgp/yabmp/master
