@@ -33,7 +33,7 @@ TODO
 Support
 ~~~~~~~
 
-Send email to penxiao@cisco.com, or use GitHub issue system/pull request.
+Send email to xiaoquwl@gmail.com, or use GitHub issue system/pull request.
 
 
 .. |License| image:: https://img.shields.io/hexpm/l/plug.svg
