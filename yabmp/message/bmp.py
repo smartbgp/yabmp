@@ -18,7 +18,7 @@ import binascii
 import logging
 import traceback
 
-import ipaddr
+import netaddr
 from yabgp.message.notification import Notification
 from yabgp.message.update import Update
 from yabgp.message.route_refresh import RouteRefresh
@@ -104,13 +104,13 @@ class BMPMessage(object):
         ip_value = int(binascii.b2a_hex(raw_peer_header[10:26]), 16)
         if per_header_dict['flags']['V']:
 
-            per_header_dict['addr'] = ipaddr.IPv6Address(ip_value).__str__()
+            per_header_dict['addr'] = str(netaddr.IPAddress(ip_value, version=6))
         else:
-            per_header_dict['addr'] = ipaddr.IPv4Address(ip_value).__str__()
+            per_header_dict['addr'] = str(netaddr.IPAddress(ip_value, version=4))
 
         per_header_dict['as'] = int(binascii.b2a_hex(raw_peer_header[26:30]), 16)
         LOG.debug('peer as: %s' % per_header_dict['as'])
-        per_header_dict['bgpID'] = ipaddr.IPv4Address(int(binascii.b2a_hex(raw_peer_header[30:34]), 16)).__str__()
+        per_header_dict['bgpID'] = str(netaddr.IPAddress(int(binascii.b2a_hex(raw_peer_header[30:34]), 16)))
         LOG.debug('peer bgp id: %s' % per_header_dict['bgpID'])
         per_header_dict['time'] = (int(binascii.b2a_hex(raw_peer_header[34:38]), 16),
                                    int(binascii.b2a_hex(raw_peer_header[38:42]), 16))
@@ -136,14 +136,14 @@ class BMPMessage(object):
         if bgp_msg_type == 2:
             # decode update message
             results = Update().parse(msg=[None, True, msg])
-            if results['SubError']:
-                LOG.error('error: decode update message error!, error code: %s' % results['SubError'])
-                LOG.error('Raw data: %s' % repr(results['RawData']))
+            if results['sub_error']:
+                LOG.error('error: decode update message error!, error code: %s' % results['sub_error'])
+                LOG.error('Raw data: %s' % repr(results['hex']))
                 return None
             return_result = {
-                'ATTR': results['Attributes'],
-                'NLRI': results['NLRI'],
-                'WITHDRAW': results['Withdraw']}
+                'attr': results['attr'],
+                'nlri': results['nlri'],
+                'withdraw': results['withdraw']}
             LOG.debug('bgp update message: %s' % return_result)
             return bgp_msg_type, return_result
         elif bgp_msg_type == 5:
@@ -260,9 +260,9 @@ class BMPMessage(object):
         ip_value = int(binascii.b2a_hex(msg[0:16]), 16)
         if peer_flag['V']:
             # ipv6 address
-            ip_address = ipaddr.IPv6Address(ip_value).__str__()
+            ip_address = str(netaddr.IPAddress(ip_value, version=6))
         else:
-            ip_address = ipaddr.IPv4Address(ip_value).__str__()
+            ip_address = str(netaddr.IPAddress(ip_value, version=4))
         LOG.info('local address: %s' % ip_address)
         local_port = int(binascii.b2a_hex(msg[16:18]), 16)
         LOG.info('local port: %s' % local_port)
