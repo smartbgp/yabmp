@@ -1,4 +1,4 @@
-yabgp>=0.1.3
+yabgp>=0.1.6
 netaddr>=0.7.12
 pbr>=0.5.21,<1.0
 oslo.config==1.6.0
