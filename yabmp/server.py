@@ -17,10 +17,10 @@ import logging
 import os
 import sys
 
-from yabmp import version
 from yabmp import config
+from yabmp import version, log
+from yabmp import log
 from yabmp.core.factory import BMPFactory
-from yabmp.common import log
 
 log.early_init_log(logging.DEBUG)
 

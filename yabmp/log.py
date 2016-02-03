@@ -23,9 +23,12 @@ import logging.config
 import logging.handlers
 import os
 import sys
-import ConfigParser
+if sys.version_info[0] == 2:
+    import ConfigParser
+elif sys.version_info[0] == 3:
+    from configparser import ConfigParser
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 
 CONF = cfg.CONF
@@ -40,6 +43,12 @@ CONF.register_cli_opts([
     cfg.StrOpt('log-config-file', default=None,
                help='Path to a logging config file to use')
 ])
+
+CONF.register_cli_opt(cfg.IntOpt(
+    'log-backup-count',
+    default=5,
+    help='the number of backup log file'
+))
 
 DEBUG_LOG_FORMAT = '%(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s ' \
                    '%(funcName)s %(lineno)d [-] %(message)s'
@@ -97,17 +106,19 @@ def init_log():
 
     log_file = _get_log_file()
     if log_file is not None:
+        if not os.path.exists(os.path.dirname(log_file)):
+            os.makedirs(os.path.dirname(log_file))
         log.addHandler(logging.handlers.RotatingFileHandler(
-            log_file, maxBytes=5 * 1024 * 1024, backupCount=5))
+            log_file, maxBytes=5 * 1024 * 1024, backupCount=CONF.log_backup_count))
         mode = int(CONF.log_file_mode, 8)
         os.chmod(log_file, mode)
         for handler in log.handlers:
-                    handler.setFormatter(logging.Formatter(INFOR_LOG_FORMAT))
+            handler.setFormatter(logging.Formatter(INFOR_LOG_FORMAT))
 
     if CONF.verbose:
         log.setLevel(logging.DEBUG)
         for handler in log.handlers:
-                    handler.setFormatter(logging.Formatter(DEBUG_LOG_FORMAT))
+            handler.setFormatter(logging.Formatter(DEBUG_LOG_FORMAT))
     else:
         log.setLevel(logging.INFO)
         _set_log_format(log.handlers, INFOR_LOG_FORMAT)
