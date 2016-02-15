@@ -29,7 +29,7 @@ bmp_options = [
                help='Port the bind the BMP server to'),
 
     cfg.StrOpt('write_dir',
-               default='/home/bgpmon/data/bmp/',
+               default='/home/yabgp/data/bmp/',
                help='The BMP messages storage path'),
     cfg.IntOpt('write_msg_max_size',
                default=500,

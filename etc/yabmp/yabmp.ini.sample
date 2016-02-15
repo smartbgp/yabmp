@@ -24,7 +24,7 @@
 # bind_port = 20000
 
 # the BMP messages storage path
-# write_dir = /home/bgpmon/data/bmp/
+# write_dir = /home/yabgp/data/bmp/
 
 # The Max size of one BGP message file, the unit is MB
 # write_msg_max_size = 500
