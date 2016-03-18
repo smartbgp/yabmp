@@ -14,6 +14,7 @@
 #    under the License.
 
 """ basic config """
+import os
 
 from oslo.config import cfg
 
@@ -29,7 +30,7 @@ bmp_options = [
                help='Port the bind the BMP server to'),
 
     cfg.StrOpt('write_dir',
-               default='/home/yabgp/data/bmp/',
+               default=os.path.join(os.environ['HOME'], 'data/bmp/'),
                help='The BMP messages storage path'),
     cfg.IntOpt('write_msg_max_size',
                default=500,
