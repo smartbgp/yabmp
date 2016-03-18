@@ -25,7 +25,7 @@ from yabmp.core.factory import BMPFactory
 log.early_init_log(logging.DEBUG)
 
 from twisted.internet import reactor
-from oslo.config import cfg
+from oslo_config import cfg
 
 CONF = cfg.CONF
 

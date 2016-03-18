@@ -1,5 +1,5 @@
 yabgp>=0.1.8
 netaddr>=0.7.12
 pbr==1.6
-oslo.config==1.6.0
+oslo.config>=2.1.0
 Twisted==15.0.0
