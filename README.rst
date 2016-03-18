@@ -27,8 +27,22 @@ RFCs to read to help you understand the code better:
 Quick Start
 ~~~~~~~~~~~
 
-TODO
-~~~~
+.. code:: bash
+
+   $ virtualenv yabmp-virl
+   $ source yabmp-virl/bin/activate
+   $ git clone https://github.com/smartbgp/yabmp
+   $ cd yabmp
+   $ pip install -r requirements.txt
+   $ cd bin
+   $ python yabmpd -h
+
+
+.. code:: bash
+
+   $ python yabmpd &
+
+Will starting bmpd server listen to port = 20000 and ip = 0.0.0.0
 
 Support
 ~~~~~~~
