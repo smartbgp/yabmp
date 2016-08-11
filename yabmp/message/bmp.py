@@ -135,7 +135,7 @@ class BMPMessage(object):
         msg = msg[bgp_cons.HDR_LEN:]
         if bgp_msg_type == 2:
             # decode update message
-            results = Update().parse(msg=[None, True, msg])
+            results = Update().parse(None, msg)
             if results['sub_error']:
                 LOG.error('error: decode update message error!, error code: %s' % results['sub_error'])
                 LOG.error('Raw data: %s' % repr(results['hex']))
