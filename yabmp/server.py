@@ -21,6 +21,7 @@ from yabmp import config
 from yabmp import version
 from yabmp import log
 from yabmp.core.factory import BMPFactory
+from yabmp.channel.factory import PikaFactory
 
 log.early_init_log(logging.DEBUG)
 
@@ -54,8 +55,15 @@ def prepare_service(args=None):
         except Exception as e:
             LOG.error(e, exc_info=True)
             sys.exit()
-    # start bmp server
+    # start bmp server and rabbitmq connection
     try:
+        standalone = os.environ.get("YABMP_STANDALONE", False)
+        if not standalone:
+            # rabbitmq factory
+            LOG.info('Try to connect to rabbitmq server')
+            url = os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@localhost:5672/%2F')
+            rabbit_mq_factory = PikaFactory(url)
+            rabbit_mq_factory.connect()
         reactor.listenTCP(
             CONF.bmp.bind_port, BMPFactory(msg_path=CONF.bmp.write_dir), interface=CONF.bmp.bind_host)
         LOG.info("Starting bmpd server listen to port = %s and ip = %s" % (

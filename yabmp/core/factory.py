@@ -30,7 +30,7 @@ class BMPFactory(protocol.Factory):
 
     protocol = BMP
 
-    def __init__(self, msg_path=None):
+    def __init__(self, msg_path=None, rabbit_mq_factory=None):
         LOG.info('Initial BMP Factory!')
         self.msg_path = msg_path
 
