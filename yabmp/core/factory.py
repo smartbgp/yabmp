@@ -33,8 +33,11 @@ class BMPFactory(protocol.Factory):
     def __init__(self, msg_path=None, rabbit_mq_factory=None):
         LOG.info('Initial BMP Factory!')
         self.msg_path = msg_path
+        self.channel = rabbit_mq_factory
 
     def buildProtocol(self, addr):
         """Builds a BMPProtocol instance.
         """
-        return protocol.Factory.buildProtocol(self, addr)
+        proto = protocol.Factory.buildProtocol(self, addr)
+        proto.channel = self.channel
+        return proto

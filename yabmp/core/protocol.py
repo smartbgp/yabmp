@@ -41,6 +41,7 @@ class BMP(protocol.Protocol):
         self.msg_file_path = None
         self.bgp_peer_dict = {}
         self.client_info = None
+        self.channel = None
 
     def connectionMade(self):
         """
@@ -193,12 +194,15 @@ class BMP(protocol.Protocol):
             self.bgp_peer_dict[peer_ip]['file'].write(str(msg_list) + '\n')
             self.bgp_peer_dict[peer_ip]['msg_seq'] += 1
             self.bgp_peer_dict[peer_ip]['file'].flush()
+            self.channel.send_message(exchange='', message={'type': 2, 'peer_ip': peer_ip})
 
         elif msg_type == 3:  # peer up message
             msg_list = [time.time(), self.bgp_peer_dict[peer_ip]['msg_seq'], 1, msg[1]['received_open_msg'], (0, 0)]
             self.bgp_peer_dict[peer_ip]['file'].write(str(msg_list) + '\n')
             self.bgp_peer_dict[peer_ip]['msg_seq'] += 1
             self.bgp_peer_dict[peer_ip]['file'].flush()
+            self.channel.send_message()
+            self.channel.send_message(exchange='', message={'type': 3, 'peer_ip': peer_ip})
 
     @staticmethod
     def get_last_seq(file_name):

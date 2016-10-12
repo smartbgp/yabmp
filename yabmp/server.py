@@ -23,10 +23,10 @@ from yabmp import log
 from yabmp.core.factory import BMPFactory
 from yabmp.channel.factory import PikaFactory
 
-log.early_init_log(logging.DEBUG)
-
 from twisted.internet import reactor
 from oslo_config import cfg
+
+log.early_init_log(logging.DEBUG)
 
 CONF = cfg.CONF
 
@@ -62,10 +62,12 @@ def prepare_service(args=None):
             # rabbitmq factory
             LOG.info('Try to connect to rabbitmq server')
             url = os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@localhost:5672/%2F')
-            rabbit_mq_factory = PikaFactory(url)
+            rabbit_mq_factory = PikaFactory(url=url, routing_key='%s:%s' % (CONF.bmp.bind_host, CONF.bmp.bind_port))
             rabbit_mq_factory.connect()
         reactor.listenTCP(
-            CONF.bmp.bind_port, BMPFactory(msg_path=CONF.bmp.write_dir), interface=CONF.bmp.bind_host)
+            CONF.bmp.bind_port,
+            BMPFactory(msg_path=CONF.bmp.write_dir, rabbit_mq_factory=rabbit_mq_factory),
+            interface=CONF.bmp.bind_host)
         LOG.info("Starting bmpd server listen to port = %s and ip = %s" % (
             CONF.bmp.bind_port, CONF.bmp.bind_host))
         reactor.run()

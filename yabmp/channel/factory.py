@@ -56,6 +56,8 @@ class PikaFactory(protocol.ReconnectingClientFactory):
         protocol.ReconnectingClientFactory.clientConnectionFailed(self, connector, reason.getErrorMessage())
 
     def send_message(self, exchange=None, routing_key=None, message=None):
+        if not routing_key:
+            routing_key = self.routing_key
         self.queued_messages.append((exchange, routing_key, message))
         if self.client is not None:
             self.client.send()

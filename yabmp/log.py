@@ -23,13 +23,12 @@ import logging.config
 import logging.handlers
 import os
 import sys
+from oslo_config import cfg
+
 if sys.version_info[0] == 2:
     import ConfigParser
 elif sys.version_info[0] == 3:
     from configparser import ConfigParser
-
-from oslo_config import cfg
-
 
 CONF = cfg.CONF
 
