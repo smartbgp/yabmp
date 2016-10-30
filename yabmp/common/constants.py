@@ -40,10 +40,13 @@ MSG_TYPE_STR = {
 
 # Peer types.
 PEER_TYPE_GLOBAL = 0
-PEER_TYPE_L3_VPN = 1
+PEER_TYPE_RD_INSTANCE = 1
+PEER_TYPE_LOCAL = 2
 PEER_TYPE_STR = {PEER_TYPE_GLOBAL: "Global",
-                 PEER_TYPE_L3_VPN: "L3 VPN"}
+                 PEER_TYPE_RD_INSTANCE: "RD Instance",
+                 PEER_TYPE_LOCAL: "Local Instance"}
 
+PEER_FLAGS = ['V', 'L', 'A']
 
 BMP_STAT_TYPE = {
     0: 'Number of prefixes rejected by inbound policy',

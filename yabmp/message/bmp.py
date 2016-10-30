@@ -17,8 +17,11 @@ import struct
 import binascii
 import logging
 import traceback
+import itertools
 
 import netaddr
+from bitstring import BitArray
+
 from yabgp.message.notification import Notification
 from yabgp.message.update import Update
 from yabgp.message.route_refresh import RouteRefresh
@@ -82,28 +85,29 @@ class BMPMessage(object):
         LOG.debug('decode per-peer header')
         per_header_dict['type'] = struct.unpack('!B', raw_peer_header[0:1])[0]
         # Peer Type = 0: Global Instance Peer
-        # Peer Type = 1: L3 VPN Instance Peer
-        if per_header_dict['type'] not in [0, 1]:
+        # Peer Type = 1: RD Instance Peer
+        # Peer Type = 2: Local Instance Peer
+        if per_header_dict['type'] not in [0, 1, 2]:
             raise excp.UnknownPeerTypeValue(peer_type=per_header_dict['type'])
-
         LOG.debug('peer type: %s ' % per_header_dict['type'])
+
+        # Peer Flags
         peer_flags_value = binascii.b2a_hex(raw_peer_header[1:2])
-        if peer_flags_value == '80':
-            per_header_dict['flags'] = {'V': 1, 'L': 0}  # IPv6, pre-policy Adj-RIB-In
-        elif peer_flags_value == '00':
-            per_header_dict['flags'] = {'V': 0, 'L': 0}  # IPv4, pre-policy Adj-RIB-In
-        elif peer_flags_value == '40':
-            per_header_dict['flags'] = {'V': 0, 'L': 1}  # IPv4, post-policy Adj-RIB-In
-        elif peer_flags_value == 'c0':
-            per_header_dict['flags'] = {'V': 1, 'L': 1}  # IPv6, post-policy Adj-RIB-In
+        hex_rep = hex(int(peer_flags_value, 16))
+        bit_array = BitArray(hex_rep)
+        valid_flags = [''.join(item)+'00000' for item in itertools.product('01',repeat=3)]
+        if bit_array.bin in valid_flags:
+            flags = dict(zip(bmp_cons.PEER_FLAGS, bit_array.bin))
+            per_header_dict['flags'] = flags
         else:
             raise excp.UnknownPeerFlagValue(peer_flags=peer_flags_value)
         LOG.debug('peer flag: %s ' % per_header_dict['flags'])
-        if per_header_dict['type'] == 1:
+        
+        if per_header_dict['type'] in [1, 2]:
             per_header_dict['dist'] = int(binascii.b2a_hex(raw_peer_header[2:10]), 16)
+
         ip_value = int(binascii.b2a_hex(raw_peer_header[10:26]), 16)
         if per_header_dict['flags']['V']:
-
             per_header_dict['addr'] = str(netaddr.IPAddress(ip_value, version=6))
         else:
             per_header_dict['addr'] = str(netaddr.IPAddress(ip_value, version=4))
