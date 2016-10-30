@@ -126,8 +126,7 @@ class BMPMessage(object):
         """
             Route Monitoring messages are used for initial synchronization of
         ADJ-RIBs-In. They are also used for ongoing monitoring of received
-        advertisements and withdraws. This is discussed in more detail in
-        Section 5.
+        advertisements and withdraws.
         Following the common BMP header and per-peer header is a BGP Update
         PDU.
         :param msg:
@@ -158,6 +157,73 @@ class BMPMessage(object):
             return bgp_msg_type, {'afi': bgp_route_refresh_msg[0],
                                   'sub_type': bgp_route_refresh_msg[1],
                                   'safi': bgp_route_refresh_msg[2]}
+
+    @staticmethod
+    def parse_route_mirroring_msg(msg):
+        """
+            Route Mirroring messages are used for verbatim duplication of	 		
+        messages as received. Following the common BMP header and per-peer 
+        header is a set of TLVs that contain information about a message 
+        or set of messages.
+        :param msg:
+        :return:
+        """
+        LOG.debug('decode route mirroring message')
+
+        msg_dict = {}
+        open = []
+        update = []
+        notification = []
+        route_refresh = []
+        while msg:
+            mirror_type, length = struct.unpack('!HH', msg[0:4])
+            mirror_value = msg[4: 4 + length]
+            msg = msg[4 + length:]
+            if mirror_type == 0:
+                # BGP message type
+                bgp_msg_type = struct.unpack('!B', mirror_value[18])[0]
+                LOG.debug('bgp message type=%s' % bgp_msg_type)
+                bgp_msg_body = mirror_value[bgp_cons.HDR_LEN:]
+                if bgp_msg_type == 2:
+                    # Update message
+                    bgp_update_msg = Update().parse(None, bgp_msg_body)
+                    if bgp_update_msg['sub_error']:
+                        LOG.error('error: decode update message error!, error code: %s' % bgp_update_msg['sub_error'])
+                        LOG.error('Raw data: %s' % repr(bgp_update_msg['hex']))
+                    else:
+                        update.append(bgp_update_msg)        
+                elif bgp_msg_type == 5:
+                    # Route Refresh message
+                    bgp_route_refresh_msg = RouteRefresh().parse(msg=bgp_msg_body)
+                    LOG.debug('bgp route refresh message: afi=%s,res=%s,safi=%s' % (bgp_route_refresh_msg[0],
+                                                                                    bgp_route_refresh_msg[1],
+                                                                                    bgp_route_refresh_msg[2]))
+                    route_refresh.append(bgp_route_refresh_msg)
+                elif bgp_msg_type == 1:
+                    # Open message
+                    open_msg = Open().parse(bgp_msg_body)
+                    open.append(open_msg)
+                elif bgp_msg_type == 3:
+                    # Notification message
+                    notification_msg = Notification().parse(bgp_msg_body)
+                    notification.append(notification_msg)
+            elif mirror_type == 1:
+                # Information type.
+                # Amount of this TLV is not specified but we can assume
+                # only one per mirroring message is present.
+                info_code_type = struct.unpack('!H', mirror_value)[0]
+                msg_dict['1'] = info_code_type        
+            else:
+                msg_dict[mirror_type] = binascii.unhexlify(binascii.hexlify(mirror_value))
+                LOG.info('unknow mirroring type, type = %s' % mirror_type)
+        
+        msg_dict['0'] = {
+                        'update': update,
+                        'route_refresh': route_refresh,
+                        'open': open,
+                        'notification': notification
+                        }
+        return msg_dict
 
     @staticmethod
     def parse_statistic_report_msg(msg):
@@ -360,7 +426,7 @@ class BMPMessage(object):
 
     def consume(self):
 
-        if self.msg_type in [0, 1, 2, 3]:
+        if self.msg_type in [0, 1, 2, 3, 6]:
             try:
                 per_peer_header = self.parse_per_peer_header(self.raw_body[0:42])
                 self.msg_body = self.raw_body[42:]
@@ -372,6 +438,8 @@ class BMPMessage(object):
                     return per_peer_header, self.parse_peer_down_notification(self.msg_body)
                 elif self.msg_type == 3:
                     return per_peer_header, self.parse_peer_up_notification(self.msg_body, per_peer_header['flags'])
+                elif self.msg_type == 6:
+                    return per_peer_header, self.parse_route_mirroring_msg(self.msg_body)
             except Exception as e:
                 LOG.error(e)
                 error_str = traceback.format_exc()
