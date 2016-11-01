@@ -96,9 +96,11 @@ class BMPMessage(object):
         hex_rep = hex(int(peer_flags_value, 16))
         bit_array = BitArray(hex_rep)
         valid_flags = [''.join(item)+'00000' for item in itertools.product('01',repeat=3)]
+        valid_flags.append('0000')
         if bit_array.bin in valid_flags:
             flags = dict(zip(bmp_cons.PEER_FLAGS, bit_array.bin))
             per_header_dict['flags'] = flags
+            LOG.debug('Per Peer header flags %s' %flags)
         else:
             raise excp.UnknownPeerFlagValue(peer_flags=peer_flags_value)
         LOG.debug('peer flag: %s ' % per_header_dict['flags'])
@@ -138,7 +140,7 @@ class BMPMessage(object):
         msg = msg[bgp_cons.HDR_LEN:]
         if bgp_msg_type == 2:
             # decode update message
-            results = Update().parse(None, msg)
+            results = Update().parse(None, msg, asn4=True)
             if results['sub_error']:
                 LOG.error('error: decode update message error!, error code: %s' % results['sub_error'])
                 LOG.error('Raw data: %s' % repr(results['hex']))
@@ -186,7 +188,7 @@ class BMPMessage(object):
                 bgp_msg_body = mirror_value[bgp_cons.HDR_LEN:]
                 if bgp_msg_type == 2:
                     # Update message
-                    bgp_update_msg = Update().parse(None, bgp_msg_body)
+                    bgp_update_msg = Update().parse(None, bgp_msg_body, asn4=True)
                     if bgp_update_msg['sub_error']:
                         LOG.error('error: decode update message error!, error code: %s' % bgp_update_msg['sub_error'])
                         LOG.error('Raw data: %s' % repr(bgp_update_msg['hex']))
@@ -448,6 +450,6 @@ class BMPMessage(object):
                 return None
 
         elif self.msg_type == 4:
-            return None, self.parse_initiation_msg(self.msg_body)
+            return None, self.parse_initiation_msg(self.raw_body)
         elif self.msg_type == 5:
-            return None, self.parse_termination_msg(self.msg_body)
+            return None, self.parse_termination_msg(self.raw_body)
