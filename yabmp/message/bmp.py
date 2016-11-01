@@ -95,16 +95,15 @@ class BMPMessage(object):
         peer_flags_value = binascii.b2a_hex(raw_peer_header[1:2])
         hex_rep = hex(int(peer_flags_value, 16))
         bit_array = BitArray(hex_rep)
-        valid_flags = [''.join(item)+'00000' for item in itertools.product('01',repeat=3)]
+        valid_flags = [''.join(item)+'00000' for item in itertools.product('01', repeat=3)]
         valid_flags.append('0000')
         if bit_array.bin in valid_flags:
             flags = dict(zip(bmp_cons.PEER_FLAGS, bit_array.bin))
             per_header_dict['flags'] = flags
-            LOG.debug('Per Peer header flags %s' %flags)
+            LOG.debug('Per Peer header flags %s' % flags)
         else:
             raise excp.UnknownPeerFlagValue(peer_flags=peer_flags_value)
         LOG.debug('peer flag: %s ' % per_header_dict['flags'])
-        
         if per_header_dict['type'] in [1, 2]:
             per_header_dict['dist'] = int(binascii.b2a_hex(raw_peer_header[2:10]), 16)
 
@@ -163,9 +162,9 @@ class BMPMessage(object):
     @staticmethod
     def parse_route_mirroring_msg(msg):
         """
-            Route Mirroring messages are used for verbatim duplication of	 		
-        messages as received. Following the common BMP header and per-peer 
-        header is a set of TLVs that contain information about a message 
+            Route Mirroring messages are used for verbatim duplication of
+        messages as received. Following the common BMP header and per-peer
+        header is a set of TLVs that contain information about a message
         or set of messages.
         :param msg:
         :return:
@@ -173,7 +172,7 @@ class BMPMessage(object):
         LOG.debug('decode route mirroring message')
 
         msg_dict = {}
-        open = []
+        open_l = []
         update = []
         notification = []
         route_refresh = []
@@ -193,7 +192,7 @@ class BMPMessage(object):
                         LOG.error('error: decode update message error!, error code: %s' % bgp_update_msg['sub_error'])
                         LOG.error('Raw data: %s' % repr(bgp_update_msg['hex']))
                     else:
-                        update.append(bgp_update_msg)        
+                        update.append(bgp_update_msg)
                 elif bgp_msg_type == 5:
                     # Route Refresh message
                     bgp_route_refresh_msg = RouteRefresh().parse(msg=bgp_msg_body)
@@ -204,7 +203,7 @@ class BMPMessage(object):
                 elif bgp_msg_type == 1:
                     # Open message
                     open_msg = Open().parse(bgp_msg_body)
-                    open.append(open_msg)
+                    open_l.append(open_msg)
                 elif bgp_msg_type == 3:
                     # Notification message
                     notification_msg = Notification().parse(bgp_msg_body)
@@ -214,15 +213,15 @@ class BMPMessage(object):
                 # Amount of this TLV is not specified but we can assume
                 # only one per mirroring message is present.
                 info_code_type = struct.unpack('!H', mirror_value)[0]
-                msg_dict['1'] = info_code_type        
+                msg_dict['1'] = info_code_type
             else:
                 msg_dict[mirror_type] = binascii.unhexlify(binascii.hexlify(mirror_value))
                 LOG.info('unknow mirroring type, type = %s' % mirror_type)
-        
+
         msg_dict['0'] = {
                         'update': update,
                         'route_refresh': route_refresh,
-                        'open': open,
+                        'open': open_l,
                         'notification': notification
                         }
         return msg_dict
