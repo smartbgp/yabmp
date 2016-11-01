@@ -57,13 +57,15 @@ def prepare_service(args=None):
             sys.exit()
     # start bmp server and rabbitmq connection
     try:
-        standalone = os.environ.get("YABMP_STANDALONE", False)
+        standalone = os.environ.get("YABMP_STANDALONE", True)
         if not standalone:
             # rabbitmq factory
             LOG.info('Try to connect to rabbitmq server')
             url = os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@localhost:5672/%2F')
             rabbit_mq_factory = PikaFactory(url=url, routing_key='%s:%s' % (CONF.bmp.bind_host, CONF.bmp.bind_port))
             rabbit_mq_factory.connect()
+        else:
+            rabbit_mq_factory = None
         reactor.listenTCP(
             CONF.bmp.bind_port,
             BMPFactory(msg_path=CONF.bmp.write_dir, rabbit_mq_factory=rabbit_mq_factory),
