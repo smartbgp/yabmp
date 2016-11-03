@@ -17,8 +17,11 @@ import struct
 import binascii
 import logging
 import traceback
+import itertools
 
 import netaddr
+from bitstring import BitArray
+
 from yabgp.message.notification import Notification
 from yabgp.message.update import Update
 from yabgp.message.route_refresh import RouteRefresh
@@ -82,28 +85,30 @@ class BMPMessage(object):
         LOG.debug('decode per-peer header')
         per_header_dict['type'] = struct.unpack('!B', raw_peer_header[0:1])[0]
         # Peer Type = 0: Global Instance Peer
-        # Peer Type = 1: L3 VPN Instance Peer
-        if per_header_dict['type'] not in [0, 1]:
+        # Peer Type = 1: RD Instance Peer
+        # Peer Type = 2: Local Instance Peer
+        if per_header_dict['type'] not in [0, 1, 2]:
             raise excp.UnknownPeerTypeValue(peer_type=per_header_dict['type'])
-
         LOG.debug('peer type: %s ' % per_header_dict['type'])
+
+        # Peer Flags
         peer_flags_value = binascii.b2a_hex(raw_peer_header[1:2])
-        if peer_flags_value == '80':
-            per_header_dict['flags'] = {'V': 1, 'L': 0}  # IPv6, pre-policy Adj-RIB-In
-        elif peer_flags_value == '00':
-            per_header_dict['flags'] = {'V': 0, 'L': 0}  # IPv4, pre-policy Adj-RIB-In
-        elif peer_flags_value == '40':
-            per_header_dict['flags'] = {'V': 0, 'L': 1}  # IPv4, post-policy Adj-RIB-In
-        elif peer_flags_value == 'c0':
-            per_header_dict['flags'] = {'V': 1, 'L': 1}  # IPv6, post-policy Adj-RIB-In
+        hex_rep = hex(int(peer_flags_value, 16))
+        bit_array = BitArray(hex_rep)
+        valid_flags = [''.join(item)+'00000' for item in itertools.product('01', repeat=3)]
+        valid_flags.append('0000')
+        if bit_array.bin in valid_flags:
+            flags = dict(zip(bmp_cons.PEER_FLAGS, bit_array.bin))
+            per_header_dict['flags'] = flags
+            LOG.debug('Per Peer header flags %s' % flags)
         else:
             raise excp.UnknownPeerFlagValue(peer_flags=peer_flags_value)
         LOG.debug('peer flag: %s ' % per_header_dict['flags'])
-        if per_header_dict['type'] == 1:
+        if per_header_dict['type'] in [1, 2]:
             per_header_dict['dist'] = int(binascii.b2a_hex(raw_peer_header[2:10]), 16)
+
         ip_value = int(binascii.b2a_hex(raw_peer_header[10:26]), 16)
         if per_header_dict['flags']['V']:
-
             per_header_dict['addr'] = str(netaddr.IPAddress(ip_value, version=6))
         else:
             per_header_dict['addr'] = str(netaddr.IPAddress(ip_value, version=4))
@@ -122,8 +127,7 @@ class BMPMessage(object):
         """
             Route Monitoring messages are used for initial synchronization of
         ADJ-RIBs-In. They are also used for ongoing monitoring of received
-        advertisements and withdraws. This is discussed in more detail in
-        Section 5.
+        advertisements and withdraws.
         Following the common BMP header and per-peer header is a BGP Update
         PDU.
         :param msg:
@@ -135,7 +139,7 @@ class BMPMessage(object):
         msg = msg[bgp_cons.HDR_LEN:]
         if bgp_msg_type == 2:
             # decode update message
-            results = Update().parse(None, msg)
+            results = Update().parse(None, msg, asn4=True)
             if results['sub_error']:
                 LOG.error('error: decode update message error!, error code: %s' % results['sub_error'])
                 LOG.error('Raw data: %s' % repr(results['hex']))
@@ -154,6 +158,73 @@ class BMPMessage(object):
             return bgp_msg_type, {'afi': bgp_route_refresh_msg[0],
                                   'sub_type': bgp_route_refresh_msg[1],
                                   'safi': bgp_route_refresh_msg[2]}
+
+    @staticmethod
+    def parse_route_mirroring_msg(msg):
+        """
+            Route Mirroring messages are used for verbatim duplication of
+        messages as received. Following the common BMP header and per-peer
+        header is a set of TLVs that contain information about a message
+        or set of messages.
+        :param msg:
+        :return:
+        """
+        LOG.debug('decode route mirroring message')
+
+        msg_dict = {}
+        open_l = []
+        update = []
+        notification = []
+        route_refresh = []
+        while msg:
+            mirror_type, length = struct.unpack('!HH', msg[0:4])
+            mirror_value = msg[4: 4 + length]
+            msg = msg[4 + length:]
+            if mirror_type == 0:
+                # BGP message type
+                bgp_msg_type = struct.unpack('!B', mirror_value[18])[0]
+                LOG.debug('bgp message type=%s' % bgp_msg_type)
+                bgp_msg_body = mirror_value[bgp_cons.HDR_LEN:]
+                if bgp_msg_type == 2:
+                    # Update message
+                    bgp_update_msg = Update().parse(None, bgp_msg_body, asn4=True)
+                    if bgp_update_msg['sub_error']:
+                        LOG.error('error: decode update message error!, error code: %s' % bgp_update_msg['sub_error'])
+                        LOG.error('Raw data: %s' % repr(bgp_update_msg['hex']))
+                    else:
+                        update.append(bgp_update_msg)
+                elif bgp_msg_type == 5:
+                    # Route Refresh message
+                    bgp_route_refresh_msg = RouteRefresh().parse(msg=bgp_msg_body)
+                    LOG.debug('bgp route refresh message: afi=%s,res=%s,safi=%s' % (bgp_route_refresh_msg[0],
+                                                                                    bgp_route_refresh_msg[1],
+                                                                                    bgp_route_refresh_msg[2]))
+                    route_refresh.append(bgp_route_refresh_msg)
+                elif bgp_msg_type == 1:
+                    # Open message
+                    open_msg = Open().parse(bgp_msg_body)
+                    open_l.append(open_msg)
+                elif bgp_msg_type == 3:
+                    # Notification message
+                    notification_msg = Notification().parse(bgp_msg_body)
+                    notification.append(notification_msg)
+            elif mirror_type == 1:
+                # Information type.
+                # Amount of this TLV is not specified but we can assume
+                # only one per mirroring message is present.
+                info_code_type = struct.unpack('!H', mirror_value)[0]
+                msg_dict['1'] = info_code_type
+            else:
+                msg_dict[mirror_type] = binascii.unhexlify(binascii.hexlify(mirror_value))
+                LOG.info('unknow mirroring type, type = %s' % mirror_type)
+
+        msg_dict['0'] = {
+                        'update': update,
+                        'route_refresh': route_refresh,
+                        'open': open_l,
+                        'notification': notification
+                        }
+        return msg_dict
 
     @staticmethod
     def parse_statistic_report_msg(msg):
@@ -356,7 +427,7 @@ class BMPMessage(object):
 
     def consume(self):
 
-        if self.msg_type in [0, 1, 2, 3]:
+        if self.msg_type in [0, 1, 2, 3, 6]:
             try:
                 per_peer_header = self.parse_per_peer_header(self.raw_body[0:42])
                 self.msg_body = self.raw_body[42:]
@@ -368,6 +439,8 @@ class BMPMessage(object):
                     return per_peer_header, self.parse_peer_down_notification(self.msg_body)
                 elif self.msg_type == 3:
                     return per_peer_header, self.parse_peer_up_notification(self.msg_body, per_peer_header['flags'])
+                elif self.msg_type == 6:
+                    return per_peer_header, self.parse_route_mirroring_msg(self.msg_body)
             except Exception as e:
                 LOG.error(e)
                 error_str = traceback.format_exc()
@@ -376,6 +449,6 @@ class BMPMessage(object):
                 return None
 
         elif self.msg_type == 4:
-            return None, self.parse_initiation_msg(self.msg_body)
+            return None, self.parse_initiation_msg(self.raw_body)
         elif self.msg_type == 5:
-            return None, self.parse_termination_msg(self.msg_body)
+            return None, self.parse_termination_msg(self.raw_body)
