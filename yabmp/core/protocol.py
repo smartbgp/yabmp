@@ -195,7 +195,7 @@ class BMP(protocol.Protocol):
             self.bgp_peer_dict[peer_ip]['msg_seq'] += 1
             self.bgp_peer_dict[peer_ip]['file'].flush()
             if self.channel:
-                self.channel.send_message(exchange='', message={'type': 7, 'mst_type': 2, 'peer_ip': peer_ip})
+                self.channel.send_message(exchange='', message={'type': 7, 'msg_type': 2, 'peer_ip': peer_ip})
 
         elif msg_type == 3:  # peer up message
             msg_list = [time.time(), self.bgp_peer_dict[peer_ip]['msg_seq'], 1, msg[1]['received_open_msg'], (0, 0)]
