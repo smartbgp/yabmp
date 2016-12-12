@@ -3,3 +3,4 @@ netaddr>=0.7.12
 pbr==1.6
 oslo.config>=2.1.0
 Twisted==15.0.0
+bitstring==3.1.5

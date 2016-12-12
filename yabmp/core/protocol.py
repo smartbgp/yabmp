@@ -153,7 +153,7 @@ class BMP(protocol.Protocol):
         """
         write msg to file
         """
-        if msg_type in [4, 5]:
+        if msg_type in [4, 5, 6]:
             return
         peer_ip = msg[0]['addr']
         if peer_ip not in self.bgp_peer_dict:

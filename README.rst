@@ -12,7 +12,7 @@ Overview
 
 `YABMP` is a receiver-side implementation of the `BMP` (BGP Monitoring Protocol) in the Python language. It serves as a reference for how to step through the messages and write their contents to files.
 
-This implementation covers draft BGP Monitoring Protocol draft-ietf-grow-bmp-07
+This implementation covers RFC 7854 BGP Monitoring Protocol version 3.
 
 RFCs to read to help you understand the code better:
 
