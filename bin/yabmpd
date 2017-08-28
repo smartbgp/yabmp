@@ -32,7 +32,8 @@ if os.path.exists(os.path.join(possible_topdir,
 else:
     possible_topdir = '/'
 
-from yabmp.server import main
+from yabmp.cmd import main
+
 
 if __name__ == '__main__':
     sys.exit(main())
