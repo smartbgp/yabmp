@@ -123,7 +123,7 @@ class BMP(protocol.Protocol):
             if results:
                 # write msg file
                 self.factory.handler.on_message_received(
-                    self.client_ip, self.client_port, msg_type, results)
+                    self.client_ip, self.client_port, results, msg_type)
             else:
                 LOG.error('decoding message failed.')
 
