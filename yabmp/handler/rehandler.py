@@ -55,7 +55,10 @@ class ReHandler(BaseHandler):
                 'type': msg_type,
                 'data': msg
             }
-            policy_pub.publish_message(
-                    _exchange='test',
-                    _routing_key=peer_host,
-                    _body=msg_body)
+            LOG.info('peer_ip')
+            LOG.info(peer_ip)
+            policy_pub.declare_queue(name='yabmp_%s' % peer_port)
+            # policy_pub.publish_message(
+            #         _exchange='test',
+            #         _routing_key=peer_host,
+            #         _body=msg_body)
