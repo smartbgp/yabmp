@@ -55,7 +55,7 @@ class ReHandler(BaseHandler):
                 'type': msg_type,
                 'data': msg
             }
-            if not policy_pub.publish_message(
-                    _exchange=Publisher.EXCHANGE_MGMT_CONTAINER,
+            policy_pub.publish_message(
+                    _exchange='test',
                     _routing_key=peer_host,
-                    _body=msg_body):
+                    _body=msg_body)
