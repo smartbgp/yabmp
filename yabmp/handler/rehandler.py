@@ -47,6 +47,7 @@ class ReHandler(BaseHandler):
     def on_message_received(self, peer_host, peer_port, msg, msg_type):
         """process for message received
         """
+        LOG.info('test')
         peer_ip = msg[0]['addr']
         if peer_ip not in self.bgp_peer_dict:
             self.bgp_peer_dict[peer_ip] = {}
