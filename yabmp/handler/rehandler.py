@@ -47,6 +47,8 @@ class ReHandler(BaseHandler):
     def on_message_received(self, peer_host, peer_port, msg, msg_type):
         """process for message received
         """
+        if msg_type in [4, 5, 6]:
+            return
         peer_ip = msg[0]['addr']
         LOG.info('peer_ip')
         LOG.info(peer_ip)
