@@ -59,10 +59,8 @@ class ReHandler(BaseHandler):
                 'data': msg
             }
             policy_pub.declare_queue(name=peer_host)
-            policy_pub.publish_message(
-                    _exchange='test',
-                    _routing_key=peer_host,
-                    _body=msg_body)
+            policy_pub.bind_queue(_exchange='test', _queue=peer_host)
+            policy_pub.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
             LOG.info('pub')
         if msg_type == 2:
             LOG.info('2')
