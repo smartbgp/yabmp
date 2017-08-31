@@ -63,6 +63,7 @@ class ReHandler(BaseHandler):
                     _exchange='test',
                     _routing_key=peer_host,
                     _body=msg_body)
+        policy_pub.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
         # if msg_type == 1:  # statistic message
         #     msg_list = [time.time(), self.bgp_peer_dict[peer_ip]['msg_seq'], 129, msg[1], (0, 0)]
         #     self.bgp_peer_dict[peer_ip]['file'].write(str(msg_list) + '\n')
