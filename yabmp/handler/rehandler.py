@@ -58,12 +58,15 @@ class ReHandler(BaseHandler):
                 'type': msg_type,
                 'data': msg
             }
-            policy_pub.declare_queue(name='yabmp_%s' % peer_host)
+            policy_pub.declare_queue(name=peer_host)
             policy_pub.publish_message(
                     _exchange='test',
                     _routing_key=peer_host,
                     _body=msg_body)
-        policy_pub.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
+        if msg_type == 1:
+            policy_pub.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
+        elif msg_type == 2:
+            policy_pub.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
         # if msg_type == 1:  # statistic message
         #     msg_list = [time.time(), self.bgp_peer_dict[peer_ip]['msg_seq'], 129, msg[1], (0, 0)]
         #     self.bgp_peer_dict[peer_ip]['file'].write(str(msg_list) + '\n')
