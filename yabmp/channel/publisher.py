@@ -22,7 +22,7 @@ import json
 
 import pika
 
-from yacore.channel import Channel
+from yabmp.channel import Channel
 
 
 LOG = logging.getLogger(__name__)
