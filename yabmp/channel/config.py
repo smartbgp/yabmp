@@ -1,7 +1,7 @@
 # Copyright 2015 Cisco Systems, Inc.
 # All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
 #
@@ -13,16 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from yabmp.service import prepare_service
-from yabmp.handler.rehandler import ReHandler
+""" message queue config """
 
+import os
 
-# def main():
-#     prepare_service()
+from oslo_config import cfg
 
-def main():
-    try:
-        handler = ReHandler()
-        prepare_service(handler=handler)
-    except Exception as e:
-        print(e)
+CONF = cfg.CONF
+
+rabbit_mq = [
+    cfg.StrOpt('rabbit_url',
+               default=os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@localhost:5672/%2F'),
+               help='The RabbitMQ connection url')
+]

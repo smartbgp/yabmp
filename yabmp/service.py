@@ -20,6 +20,7 @@ from yabmp import version
 from yabmp import log
 from yabmp.core.factory import BMPFactory
 from yabmp.handler.default import DefaultHandler
+from yabmp.channel import config as channel_config
 
 from twisted.internet import reactor
 from oslo_config import cfg
@@ -32,12 +33,15 @@ CONF.register_cli_opts(config.bmp_options)
 
 LOG = logging.getLogger(__name__)
 
+def cli_opts_register():
+    CONF.register_cli_opts(channel_config.rabbit_mq, group='rabbit_mq')
 
 def prepare_service(args=None, handler=None):
     """prepare the twisted service
 
     :param hander: handler object
     """
+    cli_opts_register()
     if not handler:
         handler = DefaultHandler()
     try:
