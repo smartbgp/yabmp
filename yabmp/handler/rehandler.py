@@ -58,7 +58,7 @@ class ReHandler(BaseHandler):
                 'type': msg_type,
                 'data': msg
             }
-            policy_pub.declare_queue(name=peer_host)
+            policy_pub.declare_queue(name='yabmpd_%s', peer_host)
             policy_pub.bind_queue(_exchange='test', _queue=peer_host)
             policy_pub.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
             LOG.info('pub')
