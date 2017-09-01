@@ -12,7 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import os
+
 import sys
 import time
 import logging
@@ -25,6 +25,7 @@ from yabmp.service import prepare_service
 CONF = cfg.CONF
 
 LOG = logging.getLogger(__name__)
+
 
 class ReHandler(BaseHandler):
     """rewrite handler to cast message of peer up and down
@@ -52,7 +53,10 @@ class ReHandler(BaseHandler):
                     "client_port": peer_port
                 }
             }
-            self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
+            self.puber.publish_message(
+                _exchange='yabmp_%s' % peer_host,
+                _routing_key='yabmp_%s' % peer_host,
+                _body=msg_body)
         except Exception as e:
             LOG.info(e)
 
@@ -94,11 +98,17 @@ class ReHandler(BaseHandler):
                     "bgp_peer_ip": peer_ip
                 }
             }
-            self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
+            self.puber.publish_message(
+                _exchange='yabmp_%s' % peer_host,
+                _routing_key='yabmp_%s' % peer_host,
+                _body=msg_body)
         else:
             return
+
+
 def cli_opts_register():
     CONF.register_cli_opts(channel_config.rabbit_mq, group='rabbit_mq')
+
 
 def main():
     try:
@@ -107,6 +117,7 @@ def main():
         prepare_service(handler=handler)
     except Exception as e:
         print(e)
+
 
 if __name__ == '__main__':
     sys.exit(main())
