@@ -39,44 +39,54 @@ class ReHandler(BaseHandler):
         """process for connection made
         """
         try:
-            self.puber.declare_queue(name=peer_host)
-            # self.puber.declare_exchange(_exchange='test', _type='direct')
-            # self.puber.bind_queue(_exchange='test', _queue=peer_host)
+            self.puber.declare_queue(name='yabmp_%s' % peer_host)
+            # self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
+            # self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
+            msg_body = {
+                "type": "BMP connection lost"
+                "data": time.time() + ", BMP Client %s connection made" % peer_host
+            }
+            self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
+            LOG.info('connection made')
         except Exception as e:
             LOG.info(e)
-        self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body='connection made')
-        LOG.info('connection made')
 
     def on_connection_lost(self, peer_host, peer_port):
         """process for connection lost
         """
         try:
             self.puber.declare_queue(name=peer_host)
-            # self.puber.declare_exchange(_exchange='test', _type='direct')
-            # self.puber.bind_queue(_exchange='test', _queue=peer_host)
+            # self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
+            # self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
+            msg_body = {
+                "type": "BMP connection lost"
+                "data": time.time() + ", BMP Client %s connection lost" % peer_host
+            }
+            self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
+            LOG.info('connection lost')
         except Exception as e:
             LOG.info(e)
-        self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body="connection lost")
-        LOG.info('connection lost')
 
     def on_message_received(self, peer_host, peer_port, msg, msg_type):
         """process for message received
         """
         if msg_type in [0, 1, 4, 5, 6]:
             return
-        peer_ip = msg[0]['addr']
-        if peer_ip not in self.bgp_peer_dict:
-            self.bgp_peer_dict[peer_ip] = {}
-            msg_body = {
-                'type': msg_type,
-                'data': msg
-            }
-            self.puber.declare_queue(name=peer_host)
-            self.puber.bind_queue(_exchange='test', _queue=peer_host)
-            self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
-            LOG.info('if')
         else:
+            peer_ip = msg[0]['addr']
+            LOG.info('peer_ip')
+            LOG.info(peer_ip)
             if msg_type == 2:
-                self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
+                msg_body = {
+                    "type": "peer down",
+                    "data": time.time() + ", peer %s" % peer_ip + "state changed to down"
+                }
+                self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
             elif msg_type == 3:
-                self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
+                msg_type = {
+                    "type": "peer up",
+                    "data": time.time() + ", peer %s" % peer_ip + "state changed to up"
+                }
+                self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
+            else:
+                return
