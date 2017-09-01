@@ -71,7 +71,6 @@ class ReHandler(BaseHandler):
                 }
             }
             self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
-            LOG.info('connection lost')
         except Exception as e:
             LOG.info(e)
 
@@ -81,9 +80,10 @@ class ReHandler(BaseHandler):
         if msg_type in [0, 1, 4, 5, 6]:
             return
         elif msg_type in [2, 3]:
+            self.puber.declare_queue(name=peer_host)
+            self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
+            self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             peer_ip = msg[0]['addr']
-            LOG.info('peer_ip')
-            LOG.info(peer_ip)
             msg_body = {
                 "type": msg_type,
                 "data": {
