@@ -51,7 +51,6 @@ class ReHandler(BaseHandler):
                 }
             }
             self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
-            LOG.info('connection made')
         except Exception as e:
             LOG.info(e)
 
