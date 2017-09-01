@@ -38,9 +38,10 @@ class ReHandler(BaseHandler):
     def on_connection_made(self, peer_host, peer_port):
         """process for connection made
         """
+        LOG.info('connection made')
         self.puber.declare_queue(name=peer_host)
         self.puber.bind_queue(_exchange='test', _queue=peer_host)
-        self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body="connection made")
+        self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body='connection made')
 
     def on_connection_lost(self, peer_host, peer_port):
         """process for connection lost

@@ -84,7 +84,7 @@ class Publisher(Channel):
         """
         if not self.connect():
             return False
-        self._channel.queue_declare(queue=name, durable=True, passive=True)
+        self._channel.queue_declare(queue=name, durable=True)
 
     def publish_message(self, _exchange, _routing_key, _body):
         """
