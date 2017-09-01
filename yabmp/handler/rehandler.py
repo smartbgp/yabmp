@@ -40,8 +40,11 @@ class ReHandler(BaseHandler):
         """
         LOG.info('connection made')
         self.puber.declare_queue(name=peer_host)
+        LOG.info('queue declared')
         self.puber.bind_queue(_exchange='test', _queue=peer_host)
+        LOG.info('queue binded')
         self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body='connection made')
+        LOG.info('queue message published')
 
     def on_connection_lost(self, peer_host, peer_port):
         """process for connection lost
