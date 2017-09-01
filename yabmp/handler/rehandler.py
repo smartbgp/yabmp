@@ -38,20 +38,26 @@ class ReHandler(BaseHandler):
     def on_connection_made(self, peer_host, peer_port):
         """process for connection made
         """
-        LOG.info('connection made')
-        self.puber.declare_queue(name=peer_host)
-        LOG.info('queue declared')
-        self.puber.bind_queue(_exchange='test', _queue=peer_host)
-        LOG.info('queue binded')
+        try:
+            self.puber.declare_queue(name=peer_host)
+            self.puber.declare_exchange(_exchange='test', _type='direct')
+            self.puber.bind_queue(_exchange='test', _queue=peer_host)
+        except Exception as e:
+            LOG.info(e)
         self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body='connection made')
-        LOG.info('queue message published')
+        LOG.info('connection made')
 
     def on_connection_lost(self, peer_host, peer_port):
         """process for connection lost
         """
-        self.puber.declare_queue(name=peer_host)
-        self.puber.bind_queue(_exchange='test', _queue=peer_host)
+        try:
+            self.puber.declare_queue(name=peer_host)
+            self.puber.declare_exchange(_exchange='test', _type='direct')
+            self.puber.bind_queue(_exchange='test', _queue=peer_host)
+        except Exception as e:
+            LOG.info(e0)
         self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body="connection lost")
+        LOG.info('connection lost')
 
     def on_message_received(self, peer_host, peer_port, msg, msg_type):
         """process for message received
