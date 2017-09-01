@@ -40,8 +40,8 @@ class ReHandler(BaseHandler):
         """
         try:
             self.puber.declare_queue(name=peer_host)
-            self.puber.declare_exchange(_exchange='test', _type='direct')
-            self.puber.bind_queue(_exchange='test', _queue=peer_host)
+            # self.puber.declare_exchange(_exchange='test', _type='direct')
+            # self.puber.bind_queue(_exchange='test', _queue=peer_host)
         except Exception as e:
             LOG.info(e)
         self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body='connection made')
@@ -52,10 +52,10 @@ class ReHandler(BaseHandler):
         """
         try:
             self.puber.declare_queue(name=peer_host)
-            self.puber.declare_exchange(_exchange='test', _type='direct')
-            self.puber.bind_queue(_exchange='test', _queue=peer_host)
+            # self.puber.declare_exchange(_exchange='test', _type='direct')
+            # self.puber.bind_queue(_exchange='test', _queue=peer_host)
         except Exception as e:
-            LOG.info(e0)
+            LOG.info(e)
         self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body="connection lost")
         LOG.info('connection lost')
 
@@ -67,7 +67,6 @@ class ReHandler(BaseHandler):
         peer_ip = msg[0]['addr']
         if peer_ip not in self.bgp_peer_dict:
             self.bgp_peer_dict[peer_ip] = {}
-            # self.puber = Publisher(url=cfg.CONF.rabbit_mq.rabbit_url)
             msg_body = {
                 'type': msg_type,
                 'data': msg
@@ -75,6 +74,7 @@ class ReHandler(BaseHandler):
             self.puber.declare_queue(name=peer_host)
             self.puber.bind_queue(_exchange='test', _queue=peer_host)
             self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)
+            LOG.info('if')
         else:
             if msg_type == 2:
                 self.puber.publish_message(_exchange='test', _routing_key=peer_host, _body=msg_body)

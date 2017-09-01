@@ -99,8 +99,8 @@ class Publisher(Channel):
 
         try:
             # try to declare exchange
-            # if _exchange:
-            #     self._channel.exchange_declare(exchange=_exchange, type='direct')
+            if _exchange:
+                self._channel.exchange_declare(exchange=_exchange, type='direct')
             properties = pika.BasicProperties(
                 content_type='application/json',
                 delivery_mode=1
