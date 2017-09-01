@@ -43,8 +43,12 @@ class ReHandler(BaseHandler):
             self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
             self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             msg_body = {
-                "type": "BMP connection lost",
-                "data": str(time.time()) + ", BMP Client %s connection made" % peer_host
+                "type": 0,
+                "data": {
+                    "time": time.time(),
+                    "client_host": peer_host,
+                    "client_port": peer_port
+                }
             }
             self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
             LOG.info('connection made')
@@ -56,11 +60,15 @@ class ReHandler(BaseHandler):
         """
         try:
             self.puber.declare_queue(name=peer_host)
-            # self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
-            # self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
+            self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
+            self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             msg_body = {
-                "type": "BMP connection lost",
-                "data": str(time.time()) + ", BMP Client %s connection lost" % peer_host
+                "type": 1,
+                "data": {
+                    "time": time.time(),
+                    "client_host": peer_host,
+                    "client_port": peer_port
+                }
             }
             self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
             LOG.info('connection lost')
@@ -72,21 +80,19 @@ class ReHandler(BaseHandler):
         """
         if msg_type in [0, 1, 4, 5, 6]:
             return
-        else:
+        elif msg_type in [2, 3]:
             peer_ip = msg[0]['addr']
             LOG.info('peer_ip')
             LOG.info(peer_ip)
-            if msg_type == 2:
-                msg_body = {
-                    "type": "peer down",
-                    "data": str(time.time()) + ", peer %s" % peer_ip + "state changed to down"
+            msg_body = {
+                "type": msg_type,
+                "data": {
+                    "time": time.time(),
+                    "client_ip": peer_host,
+                    "client_port": peer_port,
+                    "bgp_peer_ip": peer_ip
                 }
-                self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
-            elif msg_type == 3:
-                msg_type = {
-                    "type": "peer up",
-                    "data": str(time.time()) + ", peer %s" % peer_ip + "state changed to up"
-                }
-                self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
-            else:
-                return
+            }
+            self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
+        else:
+            return
