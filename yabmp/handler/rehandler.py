@@ -40,8 +40,8 @@ class ReHandler(BaseHandler):
         """
         try:
             self.puber.declare_queue(name='yabmp_%s' % peer_host)
-            # self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
-            # self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
+            self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
+            self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             msg_body = {
                 "type": "BMP connection lost",
                 "data": str(time.time()) + ", BMP Client %s connection made" % peer_host
