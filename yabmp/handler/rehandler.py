@@ -59,7 +59,7 @@ class ReHandler(BaseHandler):
         """process for connection lost
         """
         try:
-            self.puber.declare_queue(name=peer_host)
+            self.puber.declare_queue(name='yabmp_%s' % peer_host)
             self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
             self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             msg_body = {
@@ -80,7 +80,7 @@ class ReHandler(BaseHandler):
         if msg_type in [0, 1, 4, 5, 6]:
             return
         elif msg_type in [2, 3]:
-            self.puber.declare_queue(name=peer_host)
+            self.puber.declare_queue(name='yabmp_%s' % peer_host)
             self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
             self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             peer_ip = msg[0]['addr']
