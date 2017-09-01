@@ -43,7 +43,7 @@ class ReHandler(BaseHandler):
             # self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
             # self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             msg_body = {
-                "type": "BMP connection lost"
+                "type": "BMP connection lost",
                 "data": time.time() + ", BMP Client %s connection made" % peer_host
             }
             self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
@@ -59,7 +59,7 @@ class ReHandler(BaseHandler):
             # self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
             # self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             msg_body = {
-                "type": "BMP connection lost"
+                "type": "BMP connection lost",
                 "data": time.time() + ", BMP Client %s connection lost" % peer_host
             }
             self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
