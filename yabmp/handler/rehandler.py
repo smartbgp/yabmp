@@ -44,7 +44,7 @@ class ReHandler(BaseHandler):
             # self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             msg_body = {
                 "type": "BMP connection lost",
-                "data": time.time() + ", BMP Client %s connection made" % peer_host
+                "data": str(time.time()) + ", BMP Client %s connection made" % peer_host
             }
             self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
             LOG.info('connection made')
@@ -60,7 +60,7 @@ class ReHandler(BaseHandler):
             # self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
             msg_body = {
                 "type": "BMP connection lost",
-                "data": time.time() + ", BMP Client %s connection lost" % peer_host
+                "data": str(time.time()) + ", BMP Client %s connection lost" % peer_host
             }
             self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
             LOG.info('connection lost')
@@ -79,13 +79,13 @@ class ReHandler(BaseHandler):
             if msg_type == 2:
                 msg_body = {
                     "type": "peer down",
-                    "data": time.time() + ", peer %s" % peer_ip + "state changed to down"
+                    "data": str(time.time()) + ", peer %s" % peer_ip + "state changed to down"
                 }
                 self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
             elif msg_type == 3:
                 msg_type = {
                     "type": "peer up",
-                    "data": time.time() + ", peer %s" % peer_ip + "state changed to up"
+                    "data": str(time.time()) + ", peer %s" % peer_ip + "state changed to up"
                 }
                 self.puber.publish_message(_exchange='yabmp_%s' % peer_host, _routing_key='yabmp_%s' % peer_host, _body=msg_body)
             else:
