@@ -329,7 +329,7 @@ class BMPMessage(object):
         # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
         LOG.info('decode peer up notification')
         ip_value = int(binascii.b2a_hex(msg[0:16]), 16)
-        if peer_flag['V']:
+        if int(peer_flag['V']):
             # ipv6 address
             ip_address = str(netaddr.IPAddress(ip_value, version=6))
         else:
