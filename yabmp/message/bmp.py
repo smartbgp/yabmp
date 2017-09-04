@@ -108,7 +108,7 @@ class BMPMessage(object):
             per_header_dict['dist'] = int(binascii.b2a_hex(raw_peer_header[2:10]), 16)
 
         ip_value = int(binascii.b2a_hex(raw_peer_header[10:26]), 16)
-        if per_header_dict['flags']['V']:
+        if int(per_header_dict['flags']['V']):
             per_header_dict['addr'] = str(netaddr.IPAddress(ip_value, version=6))
         else:
             per_header_dict['addr'] = str(netaddr.IPAddress(ip_value, version=4))
