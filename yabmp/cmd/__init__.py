@@ -13,29 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-""" BMP Factory"""
-
-import logging
-
-from twisted.internet import protocol
-
-from yabmp.core.protocol import BMP
+from yabmp.service import prepare_service
 
 
-LOG = logging.getLogger()
-
-
-class BMPFactory(protocol.Factory):
-    """Base factory for creating BMP protocol instances."""
-
-    protocol = BMP
-
-    def __init__(self, handler):
-        LOG.info('Initial BMP Factory!')
-        self.handler = handler
-
-    def buildProtocol(self, addr):
-        """Builds a BMPProtocol instance.
-        """
-        proto = protocol.Factory.buildProtocol(self, addr)
-        return proto
+def main():
+    prepare_service()

@@ -14,7 +14,6 @@
 #    under the License.
 
 """ basic config """
-import os
 
 from oslo_config import cfg
 
@@ -27,12 +26,5 @@ bmp_options = [
                help='Address to bind the BMP server to'),
     cfg.IntOpt('bind_port',
                default=20000,
-               help='Port the bind the BMP server to'),
-
-    cfg.StrOpt('write_dir',
-               default=os.path.join(os.environ['HOME'], 'data/bmp/'),
-               help='The BMP messages storage path'),
-    cfg.IntOpt('write_msg_max_size',
-               default=500,
-               help='The Max size of one BMP message file, the unit is MB'),
+               help='Port the bind the BMP server to')
 ]

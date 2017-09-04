@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-
 # Copyright 2015 Cisco Systems, Inc.
 # All rights reserved.
 #
@@ -16,24 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-""" BMP daemon """
+""" message queue config """
 
 import os
-import sys
 
-possible_topdir = os.path.normpath(os.path.join(os.path.abspath(__file__),
-                                                os.pardir,
-                                                os.pardir))
-if os.path.exists(os.path.join(possible_topdir,
-                               'yabmp',
-                               '__init__.py')):
-    sys.path.insert(0, possible_topdir)
+from oslo_config import cfg
 
-else:
-    possible_topdir = '/'
+CONF = cfg.CONF
 
-from yabmp.cmd import main
-
-
-if __name__ == '__main__':
-    sys.exit(main())
+rabbit_mq = [
+    cfg.StrOpt('rabbit_url',
+               default=os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@localhost:5672/%2F'),
+               help='The RabbitMQ connection url')
+]
