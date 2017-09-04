@@ -23,9 +23,9 @@ RFCs to read to help you understand the code better:
 Quick Start
 ~~~~~~~~~~~
 
-.. code:: bash
-
 Use `pip install yabmp` or install from source.
+
+.. code:: bash
 
    $ virtualenv yabmp-virl
    $ source yabmp-virl/bin/activate
