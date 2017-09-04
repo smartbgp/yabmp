@@ -1,11 +1,7 @@
 YABMP
 =====
 
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/smartbgp/yabmp
-   :target: https://gitter.im/smartbgp/yabmp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
-|License| |Build Status| |Code Climate|
+|Python Version| |Version| |License| |Build Status| |Code Climate|
 
 Overview
 ~~~~~~~~
@@ -28,6 +24,8 @@ Quick Start
 ~~~~~~~~~~~
 
 .. code:: bash
+
+Use `pip install yabmp` or install from source.
 
    $ virtualenv yabmp-virl
    $ source yabmp-virl/bin/activate
@@ -56,3 +54,7 @@ Send email to xiaoquwl@gmail.com, or use GitHub issue system/pull request.
    :target: https://travis-ci.org/smartbgp/yabmp
 .. |Code Climate| image:: https://codeclimate.com/github/smartbgp/yabmp/badges/gpa.svg
    :target: https://codeclimate.com/github/smartbgp/yabmp
+.. |Python Version| image:: https://img.shields.io/pypi/pyversions/Django.svg
+    :target: https://github.com/smartbgp/yabbmp
+.. |Version| image:: https://img.shields.io/pypi/v/yabmp.svg?
+   :target: http://badge.fury.io/py/yabmp
