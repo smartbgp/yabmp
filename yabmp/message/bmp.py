@@ -134,7 +134,7 @@ class BMPMessage(object):
         :return:
         """
         LOG.debug('decode route monitoring message')
-        bgp_msg_type = struct.unpack('!B', msg[18])[0]
+        bgp_msg_type = struct.unpack('!B', msg[18:19])[0]
         LOG.debug('bgp message type=%s' % bgp_msg_type)
         msg = msg[bgp_cons.HDR_LEN:]
         if bgp_msg_type == 2:
@@ -182,7 +182,7 @@ class BMPMessage(object):
             msg = msg[4 + length:]
             if mirror_type == 0:
                 # BGP message type
-                bgp_msg_type = struct.unpack('!B', mirror_value[18])[0]
+                bgp_msg_type = struct.unpack('!B', mirror_value[18:19])[0]
                 LOG.debug('bgp message type=%s' % bgp_msg_type)
                 bgp_msg_body = mirror_value[bgp_cons.HDR_LEN:]
                 if bgp_msg_type == 2:
@@ -278,7 +278,7 @@ class BMPMessage(object):
         # ~                                                               ~
         # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
         LOG.info('decode peer down notification')
-        reason = int(binascii.b2a_hex(msg[0]), 16)
+        reason = int(binascii.b2a_hex(msg[0:1]), 16)
         LOG.info('reason: %s' % reason)
         data = msg[1:]
 

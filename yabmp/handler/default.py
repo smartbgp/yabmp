@@ -128,7 +128,7 @@ class DefaultHandler(BaseHandler):
         """
 
         lines_2find = 1
-        f = open(file_name)
+        f = open(file_name, 'rb')
         f.seek(0, 2)  # go to the end of the file
         bytes_in_file = f.tell()
         lines_found, total_bytes_scanned = 0, 0
@@ -137,7 +137,7 @@ class DefaultHandler(BaseHandler):
             byte_block = min(1024, bytes_in_file - total_bytes_scanned)
             f.seek(-(byte_block + total_bytes_scanned), 2)
             total_bytes_scanned += byte_block
-            lines_found += f.read(1024).count('\n')
+            lines_found += f.read(1024).count(b'\n')
         f.seek(-total_bytes_scanned, 2)
         line_list = list(f.readlines())
         last_line = line_list[-lines_2find:][0]

@@ -33,7 +33,7 @@ class BMP(protocol.Protocol):
     def __init__(self):
 
         LOG.info('Building a new BGP protocol instance')
-        self.receive_buffer = ''
+        self.receive_buffer = b''
         self.message = BMPMessage()
         self.bgp_peer_dict = {}
         self.client_ip = None
@@ -75,7 +75,6 @@ class BMP(protocol.Protocol):
         """ Data has been received.
         :param data:
         """
-
         self.receive_buffer += data
         try:
             while self.parse_buffer():
