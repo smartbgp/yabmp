@@ -29,7 +29,7 @@ LOG = logging.getLogger(__name__)
 MSG_PROCESS_OPTS = [
     cfg.StrOpt(
         'write_dir',
-        default=os.path.join(os.environ.get('HOME', './'), 'data/bmp/'),
+        default=os.path.join(os.environ.get('HOME', './'), 'data/bmp/local/msg'),
         help='The BMP messages storage path'),
     cfg.IntOpt(
         'write_msg_max_size',
