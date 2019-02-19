@@ -37,7 +37,8 @@ class BMPException(Exception):
                 super(BMPException, self).__init__(self.message)
 
     def __unicode__(self):
-        return unicode(self.msg)
+        return self.msg.decode('utf8', 'ignore')
+        # return unicode(self.msg)
 
 
 class BMPVersionError(BMPException):

@@ -1,4 +1,5 @@
-yabgp
+#yabgp
+https://github.com/smartbgp/yabgp/archive/master.zip
 netaddr>=0.7.12
 pbr==2.0.0
 oslo.config==2.1.0
