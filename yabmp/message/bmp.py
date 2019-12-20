@@ -40,12 +40,13 @@ class BMPMessage(object):
     definition of BMP message and methons used to decode message.
     """
 
-    def __init__(self):
+    def __init__(self, cap_dict):
 
         self.version = None
         self.msg_type = None
         self.raw_body = None
         self.msg_body = None
+        self.peers_cap = cap_dict
 
     @staticmethod
     def parse_per_peer_header(raw_peer_header):
@@ -123,7 +124,7 @@ class BMPMessage(object):
         return per_header_dict
 
     @staticmethod
-    def parse_route_monitoring_msg(msg):
+    def parse_route_monitoring_msg(msg, asn4=False):
         """
             Route Monitoring messages are used for initial synchronization of
         ADJ-RIBs-In. They are also used for ongoing monitoring of received
@@ -139,7 +140,7 @@ class BMPMessage(object):
         msg = msg[bgp_cons.HDR_LEN:]
         if bgp_msg_type == 2:
             # decode update message
-            results = Update().parse(None, msg, asn4=True)
+            results = Update().parse(None, msg, asn4=asn4)
             if results['sub_error']:
                 LOG.error('error: decode update message error!, error code: %s' % results['sub_error'])
                 LOG.error('Raw data: %s' % repr(results['hex']))
@@ -160,7 +161,7 @@ class BMPMessage(object):
                                   'safi': bgp_route_refresh_msg[2]}
 
     @staticmethod
-    def parse_route_mirroring_msg(msg):
+    def parse_route_mirroring_msg(msg, asn4=False):
         """
             Route Mirroring messages are used for verbatim duplication of
         messages as received. Following the common BMP header and per-peer
@@ -187,7 +188,7 @@ class BMPMessage(object):
                 bgp_msg_body = mirror_value[bgp_cons.HDR_LEN:]
                 if bgp_msg_type == 2:
                     # Update message
-                    bgp_update_msg = Update().parse(None, bgp_msg_body, asn4=True)
+                    bgp_update_msg = Update().parse(None, bgp_msg_body, asn4=asn4)
                     if bgp_update_msg['sub_error']:
                         LOG.error('error: decode update message error!, error code: %s' % bgp_update_msg['sub_error'])
                         LOG.error('Raw data: %s' % repr(bgp_update_msg['hex']))
@@ -425,22 +426,32 @@ class BMPMessage(object):
         LOG.info('termination message = %s' % msg_dict)
         return msg_dict
 
-    def consume(self):
+    def consume(self, client_ip):
 
         if self.msg_type in [0, 1, 2, 3, 6]:
             try:
                 per_peer_header = self.parse_per_peer_header(self.raw_body[0:42])
                 self.msg_body = self.raw_body[42:]
                 if self.msg_type == 0:
-                    return per_peer_header, self.parse_route_monitoring_msg(self.msg_body)
+                    peer_ip = per_peer_header.get('addr', None)
+                    asn4 = self.peers_cap[client_ip][peer_ip].get("capabilities", {}).get('four_bytes_as', False)
+                    return per_peer_header, self.parse_route_monitoring_msg(self.msg_body, asn4=asn4)
                 elif self.msg_type == 1:
                     return per_peer_header, self.parse_statistic_report_msg(self.msg_body)
                 elif self.msg_type == 2:
                     return per_peer_header, self.parse_peer_down_notification(self.msg_body)
                 elif self.msg_type == 3:
+                    peer_ip = per_peer_header.get('addr', None)
+                    peer_up_msg = self.parse_peer_up_notification(self.msg_body, per_peer_header['flags'])
+                    recirved_open = peer_up_msg.get("received_open_msg", {})
+                    if self.peers_cap.get(client_ip, None) is None:
+                        self.peers_cap[client_ip] = {}
+                    self.peers_cap[client_ip][peer_ip] = recirved_open
                     return per_peer_header, self.parse_peer_up_notification(self.msg_body, per_peer_header['flags'])
                 elif self.msg_type == 6:
-                    return per_peer_header, self.parse_route_mirroring_msg(self.msg_body)
+                    peer_ip = per_peer_header.get('addr', None)
+                    asn4 = self.peers_cap[client_ip][peer_ip].get("capabilities", {}).get('four_bytes_as', False)
+                    return per_peer_header, self.parse_route_mirroring_msg(self.msg_body, asn4=asn4)
             except Exception as e:
                 LOG.error(e)
                 error_str = traceback.format_exc()

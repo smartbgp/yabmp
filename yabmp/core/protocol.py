@@ -29,13 +29,13 @@ class BMP(protocol.Protocol):
     """
     BGP Monitoring Protocol
     """
+    cap_dict = {}
 
     def __init__(self):
 
         LOG.info('Building a new BGP protocol instance')
         self.receive_buffer = b''
-        self.message = BMPMessage()
-        self.bgp_peer_dict = {}
+        self.message = BMPMessage(BMP.cap_dict)
         self.client_ip = None
         self.client_port = None
 
@@ -118,7 +118,7 @@ class BMP(protocol.Protocol):
         self.message.raw_body = msg_value
         LOG.debug('Decoding message...')
         try:
-            results = self.message.consume()
+            results = self.message.consume(self.client_ip)
             if results:
                 # write msg file
                 self.factory.handler.on_message_received(
@@ -131,7 +131,8 @@ class BMP(protocol.Protocol):
             error_str = traceback.format_exc()
             LOG.debug(error_str)
         LOG.debug('Finished decoding.')
-        self.message = BMPMessage()
+
+        self.message = BMPMessage(BMP.cap_dict)
         LOG.debug('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+')
         self.receive_buffer = self.receive_buffer[length:]
         return True
