@@ -82,31 +82,34 @@ class ReHandler(BaseHandler):
         except Exception as e:
             LOG.info(e)
 
-    def on_message_received(self, peer_host, peer_port, msg, msg_type):
+    def on_message_received(self, peer_host, peer_port, msg, msg_type, data_type, length):
         """process for message received
         """
-        if msg_type in [0, 1, 4, 5, 6]:
-            return
-        elif msg_type in [2, 3]:
-            self.puber.declare_queue(name='yabmp_%s' % peer_host)
-            self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
-            self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
-            peer_ip = msg[0]['addr']
-            msg_body = {
-                "type": msg_type,
-                "data": {
-                    "time": time.time(),
-                    "client_ip": peer_host,
-                    "client_port": peer_port,
-                    "bgp_peer_ip": peer_ip
+        if 'parse' in data_type:
+            if msg_type in [0, 1, 4, 5, 6]:
+                return
+            elif msg_type in [2, 3]:
+                self.puber.declare_queue(name='yabmp_%s' % peer_host)
+                self.puber.declare_exchange(_exchange='yabmp_%s' % peer_host, _type='direct')
+                self.puber.bind_queue(_exchange='yabmp_%s' % peer_host, _queue='yabmp_%s' % peer_host)
+                peer_ip = msg[0]['addr']
+                msg_body = {
+                    "type": msg_type,
+                    "data": {
+                        "time": time.time(),
+                        "client_ip": peer_host,
+                        "client_port": peer_port,
+                        "bgp_peer_ip": peer_ip
+                    }
                 }
-            }
-            self.puber.publish_message(
-                _exchange='yabmp_%s' % peer_host,
-                _routing_key='yabmp_%s' % peer_host,
-                _body=msg_body)
-        else:
-            return
+                self.puber.publish_message(
+                    _exchange='yabmp_%s' % peer_host,
+                    _routing_key='yabmp_%s' % peer_host,
+                    _body=msg_body)
+            else:
+                return
+        elif 'raw_data' in data_type:
+            pass
 
 
 def cli_opts_register():

@@ -48,7 +48,7 @@ class BaseHandler(object):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def on_message_received(self, msg, msg_type):
+    def on_message_received(self, peer_host, peer_port, msg, msg_type, data_type, length):
         """process for message received
         """
         raise NotImplementedError()
