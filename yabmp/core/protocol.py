@@ -116,6 +116,7 @@ class BMP(protocol.Protocol):
             # the hold message does not comming yet.
             return False
         msg_value = buf[6:length]
+        raw_msg = buf[:length]
         self.message.msg_type = msg_type
         LOG.debug('Received BMP message, type=%s' % msg_type)
         self.message.raw_body = msg_value
@@ -130,7 +131,7 @@ class BMP(protocol.Protocol):
             #     LOG.error('decoding message failed.')
 
             if 'parse' in CONF.data.type:
-                results = self.message.consume()
+                results = self.message.consume(self.client_ip)
                 if results:
                     self.factory.handler.on_message_received(
                         self.client_ip, self.client_port, results, msg_type, CONF.data.type, length)
@@ -138,7 +139,7 @@ class BMP(protocol.Protocol):
                     LOG.error('decoding message failed.')
             if 'raw_data' in CONF.data.type:
                 self.factory.handler.on_message_received(
-                    self.client_ip, self.client_port, msg_value, msg_type, CONF.data.type, length)
+                    self.client_ip, self.client_port, raw_msg, msg_type, CONF.data.type, length)
 
         except Exception as e:
             LOG.error(e)
