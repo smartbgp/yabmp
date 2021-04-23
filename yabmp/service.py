@@ -29,6 +29,7 @@ log.early_init_log(logging.DEBUG)
 CONF = cfg.CONF
 
 CONF.register_cli_opts(config.bmp_options)
+CONF.register_cli_opts(config.DATA_OPTS, group='data')
 
 LOG = logging.getLogger(__name__)
 

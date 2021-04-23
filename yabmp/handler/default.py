@@ -14,6 +14,7 @@
 #    under the License.
 
 import os
+import shutil
 import logging
 import sys
 import time
@@ -55,6 +56,15 @@ class DefaultHandler(BaseHandler):
                 LOG.error(e, exc_info=True)
                 sys.exit()
 
+        # mv history msg to back directory
+        for fpath, dirname, fnames in os.walk(CONF.message.write_dir):
+            if fnames:
+                if not os.path.exists(fpath.replace('/msg/', '/history_msg/')):
+                    os.makedirs(fpath.replace('/msg/', '/history_msg/'))
+                old_file_path = "%s/%s" % (fpath, fnames[0])
+                new_file_path = old_file_path.replace('/msg/', '/history_msg/')
+                shutil.move(old_file_path, new_file_path)
+
     def on_connection_made(self, peer_host, peer_port):
         """process for connection made
         """
@@ -68,57 +78,70 @@ class DefaultHandler(BaseHandler):
         """
         pass
 
-    def on_message_received(self, peer_host, peer_port, msg, msg_type):
+    def on_message_received(self, peer_host, peer_port, msg, msg_type, data_type, length):
         """process for message received
         """
-        if msg_type in [4, 5, 6]:
-            return
-        peer_ip = msg[0]['addr']
-        if peer_ip not in self.bgp_peer_dict:
-            self.bgp_peer_dict[peer_ip] = {}
-            peer_msg_path = os.path.join(
-                os.path.join(CONF.message.write_dir, peer_host), peer_ip)
-            if not os.path.exists(peer_msg_path):
-                # this peer first come out
-                # create a peer path and open the first message file
-                os.makedirs(peer_msg_path)
-                LOG.info('Create directory for peer: %s' % peer_msg_path)
-                msg_file_name = os.path.join(peer_msg_path, '%s.msg' % time.time())
-                self.bgp_peer_dict[peer_ip]['msg_seq'] = 1
-            else:
-                # this peer is not first come out
-                # find the latest message file and get the last message sequence number
-                file_list = os.listdir(peer_msg_path)
-                file_list.sort()
-                msg_file_name = os.path.join(peer_msg_path, file_list[-1])
-                self.bgp_peer_dict[peer_ip]['msg_seq'] = self.get_last_seq(msg_file_name)
-            self.bgp_peer_dict[peer_ip]['file'] = open(msg_file_name, 'a')
-        if msg_type == 0:  # route monitoring message
-            if msg[0]['flags']['L']:
-                # pos-policy RIB
-                msg_list = [time.time(), self.bgp_peer_dict[peer_ip]['msg_seq'], 130, msg[1], (1, 1)]
-            else:
-                # pre-policy RIB
-                msg_list = [time.time(), self.bgp_peer_dict[peer_ip]['msg_seq'], msg[1][0], msg[1][1], (1, 1)]
-            self.bgp_peer_dict[peer_ip]['file'].write(str(msg_list) + '\n')
-            self.bgp_peer_dict[peer_ip]['msg_seq'] += 1
-            self.bgp_peer_dict[peer_ip]['file'].flush()
-        elif msg_type == 1:  # statistic message
-            msg_list = [time.time(), self.bgp_peer_dict[peer_ip]['msg_seq'], 129, msg[1], (0, 0)]
-            self.bgp_peer_dict[peer_ip]['file'].write(str(msg_list) + '\n')
-            self.bgp_peer_dict[peer_ip]['msg_seq'] += 1
-            self.bgp_peer_dict[peer_ip]['file'].flush()
-        elif msg_type == 2:  # peer down message
-            msg_list = [time.time(), self.bgp_peer_dict[peer_ip]['msg_seq'], 3, msg[1], (0, 0)]
-            self.bgp_peer_dict[peer_ip]['file'].write(str(msg_list) + '\n')
-            self.bgp_peer_dict[peer_ip]['msg_seq'] += 1
-            self.bgp_peer_dict[peer_ip]['file'].flush()
+        if 'parse' in data_type:
+            if msg_type in [4, 5, 6]:
+                return
+            peer_ip = msg[0]['addr']
+            if peer_host not in self.bgp_peer_dict.keys():
+                self.bgp_peer_dict[peer_host] = {}
+            if peer_ip not in self.bgp_peer_dict[peer_host].keys():
+                self.bgp_peer_dict[peer_host][peer_ip] = {}
+                peer_msg_path = os.path.join(
+                    os.path.join(CONF.message.write_dir, peer_host), peer_ip)
+                if not os.path.exists(peer_msg_path):
+                    # this peer first come out
+                    # create a peer path and open the first message file
+                    os.makedirs(peer_msg_path)
+                    LOG.info('Create directory for peer: %s' % peer_msg_path)
+                    msg_file_name = os.path.join(peer_msg_path, '%s.msg' % time.time())
+                    self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'] = 1
+                else:
+                    # this peer is not first come out
+                    # find the latest message file and get the last message sequence number
+                    file_list = os.listdir(peer_msg_path)
+                    if not file_list:
+                        LOG.info('Create directory for peer: %s' % peer_msg_path)
+                        msg_file_name = os.path.join(peer_msg_path, '%s.msg' % time.time())
+                        self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'] = 1
+                    else:
+                        file_list.sort()
+                        msg_file_name = os.path.join(peer_msg_path, file_list[-1])
+                        self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'] = self.get_last_seq(msg_file_name)
+                self.bgp_peer_dict[peer_host][peer_ip]['file'] = open(msg_file_name, 'a')
+            if msg_type == 0:  # route monitoring message
+                if msg[0]['flags']['L']:
+                    # pos-policy RIB
+                    msg_list = [time.time(), self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'], 130, msg[1], (1, 1)]
+                else:
+                    # pre-policy RIB
+                    msg_list = [time.time(), self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'],
+                                msg[1][0], msg[1][1], (1, 1)]
+                self.bgp_peer_dict[peer_host][peer_ip]['file'].write(str(msg_list) + '\n')
+                self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'] += 1
+                self.bgp_peer_dict[peer_host][peer_ip]['file'].flush()
+            elif msg_type == 1:  # statistic message
+                msg_list = [time.time(), self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'], 129, msg[1], (0, 0)]
+                self.bgp_peer_dict[peer_host][peer_ip]['file'].write(str(msg_list) + '\n')
+                self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'] += 1
+                self.bgp_peer_dict[peer_host][peer_ip]['file'].flush()
+            elif msg_type == 2:  # peer down message
+                msg_list = [time.time(), self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'], 3, msg[1], (0, 0)]
+                self.bgp_peer_dict[peer_host][peer_ip]['file'].write(str(msg_list) + '\n')
+                self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'] += 1
+                self.bgp_peer_dict[peer_host][peer_ip]['file'].flush()
 
-        elif msg_type == 3:  # peer up message
-            msg_list = [time.time(), self.bgp_peer_dict[peer_ip]['msg_seq'], 1, msg[1]['received_open_msg'], (0, 0)]
-            self.bgp_peer_dict[peer_ip]['file'].write(str(msg_list) + '\n')
-            self.bgp_peer_dict[peer_ip]['msg_seq'] += 1
-            self.bgp_peer_dict[peer_ip]['file'].flush()
+            elif msg_type == 3:  # peer up message
+                msg_list = [time.time(), self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'], 1,
+                            msg[1]['received_open_msg'], (0, 0)]
+                self.bgp_peer_dict[peer_host][peer_ip]['file'].write(str(msg_list) + '\n')
+                self.bgp_peer_dict[peer_host][peer_ip]['msg_seq'] += 1
+                self.bgp_peer_dict[peer_host][peer_ip]['file'].flush()
+
+        if 'raw_data' in data_type:
+            pass
 
     @staticmethod
     def get_last_seq(file_name):

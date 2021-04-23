@@ -17,10 +17,13 @@ import logging
 import struct
 import traceback
 from twisted.internet import protocol
+from oslo_config import cfg
 
 from yabmp.common import constants as bmp_cons
 from yabmp.common import exception as excp
 from yabmp.message.bmp import BMPMessage
+
+CONF = cfg.CONF
 
 LOG = logging.getLogger()
 
@@ -29,13 +32,13 @@ class BMP(protocol.Protocol):
     """
     BGP Monitoring Protocol
     """
+    cap_dict = {}
 
     def __init__(self):
 
         LOG.info('Building a new BGP protocol instance')
         self.receive_buffer = b''
-        self.message = BMPMessage()
-        self.bgp_peer_dict = {}
+        self.message = BMPMessage(BMP.cap_dict)
         self.client_ip = None
         self.client_port = None
 
@@ -113,25 +116,38 @@ class BMP(protocol.Protocol):
             # the hold message does not comming yet.
             return False
         msg_value = buf[6:length]
+        raw_msg = buf[:length]
         self.message.msg_type = msg_type
         LOG.debug('Received BMP message, type=%s' % msg_type)
         self.message.raw_body = msg_value
         LOG.debug('Decoding message...')
         try:
-            results = self.message.consume()
-            if results:
-                # write msg file
+            # results = self.message.consume(self.client_ip)
+            # if results:
+            #     # write msg file
+            #     self.factory.handler.on_message_received(
+            #         self.client_ip, self.client_port, results, msg_type)
+            # else:
+            #     LOG.error('decoding message failed.')
+
+            if 'parse' in CONF.data.type:
+                results = self.message.consume(self.client_ip)
+                if results:
+                    self.factory.handler.on_message_received(
+                        self.client_ip, self.client_port, results, msg_type, CONF.data.type, length)
+                else:
+                    LOG.error('decoding message failed.')
+            if 'raw_data' in CONF.data.type:
                 self.factory.handler.on_message_received(
-                    self.client_ip, self.client_port, results, msg_type)
-            else:
-                LOG.error('decoding message failed.')
+                    self.client_ip, self.client_port, raw_msg, msg_type, CONF.data.type, length)
 
         except Exception as e:
             LOG.error(e)
             error_str = traceback.format_exc()
             LOG.debug(error_str)
         LOG.debug('Finished decoding.')
-        self.message = BMPMessage()
+
+        self.message = BMPMessage(BMP.cap_dict)
         LOG.debug('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+')
         self.receive_buffer = self.receive_buffer[length:]
         return True
