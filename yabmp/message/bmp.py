@@ -48,6 +48,27 @@ class BMPMessage(object):
         self.msg_body = None
 
     @staticmethod
+    def rd2str(rd):
+        """
+        Convert 8 bytes of router distinguisher into string
+        according to rfc4364 section 4.2.
+        The first two bytes defines decode format
+         0     asn:nn
+         1     ip:nn
+         2     asn4:nn
+        """
+        rd_type = int.from_bytes(rd[0:2], "big");
+        if rd_type == 0:
+            return str(int.from_bytes(rd[2:4], "big")) + ":" + str(int.from_bytes(rd[4:8], "big"))
+        elif rd_type == 1:
+            ip_value = int(binascii.b2a_hex(rd[2:6]), 16)
+            return str(netaddr.IPAddress(ip_value, version=4)) + ":" + str(int.from_bytes(rd[6:8], "big"))
+        elif rd_type == 2:
+            return str(int.from_bytes(rd[2:6], "big")) + ":" + str(int.from_bytes(rd[6:8], "big"))
+        else:
+            return str (rd[0:8])
+
+    @staticmethod
     def parse_per_peer_header(raw_peer_header):
         """
         decode per-peer header.
@@ -105,7 +126,8 @@ class BMPMessage(object):
             raise excp.UnknownPeerFlagValue(peer_flags=peer_flags_value)
         LOG.debug('peer flag: %s ' % per_header_dict['flags'])
         if per_header_dict['type'] in [1, 2]:
-            per_header_dict['dist'] = int(binascii.b2a_hex(raw_peer_header[2:10]), 16)
+            per_header_dict['dist'] = BMPMessage.rd2str(raw_peer_header[2:10])
+            LOG.debug('peer dist: %s' % per_header_dict['dist'])
 
         ip_value = int(binascii.b2a_hex(raw_peer_header[10:26]), 16)
         if int(per_header_dict['flags']['V']):
