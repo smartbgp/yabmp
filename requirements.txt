@@ -3,7 +3,7 @@ https://github.com/smartbgp/yabgp/archive/master.zip
 netaddr>=0.7.12
 pbr==2.0.0
 oslo.config==2.1.0
-Twisted==16.0.0
+Twisted==22.10.0
 bitstring==3.1.5
 six==1.10.0
 pika==0.9.14
